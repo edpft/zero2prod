@@ -62,7 +62,7 @@ done
 
 # Create an environment variable for the sqlx-cli
 export DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}
-echo "DATABASE_URL=${DATABASE_URL}" > $HOME/repos/zero2prod/.env
+# echo "DATABASE_URL=${DATABASE_URL}" > $HOME/repos/zero2prod/.env
 sqlx database create
 
 # Run migration to define schema
