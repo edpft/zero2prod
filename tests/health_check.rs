@@ -2,8 +2,12 @@ use std::net::TcpListener;
 
 use reqwest::Client;
 
-use sqlx::PgPool;
-use zero2prod::{configuration::Settings, startup};
+use sqlx::{Connection, Executor, PgConnection, PgPool};
+use uuid::Uuid;
+use zero2prod::{
+    configuration::{DatabaseSettings, Settings},
+    startup,
+};
 
 pub struct TestApp {
     pub address: String,
@@ -16,10 +20,10 @@ async fn spawn_app() -> TestApp {
     let port = listener.local_addr().unwrap().port();
     let address = format!("http://127.0.0.1:{}", port);
 
-    let settings = Settings::get().expect("Failed to read configuration.");
-    let connection_pool = PgPool::connect(&settings.database.connection_string())
-        .await
-        .expect("Failed to connect to Postgres.");
+    let mut settings = Settings::get().expect("Failed to read configuration.");
+    settings.database.database_name = Uuid::new_v4().to_string();
+
+    let connection_pool = configure_database(&settings.database).await;
 
     let server = startup::run(listener, connection_pool.clone()).expect("Failed to bind address.");
     let _ = tokio::spawn(server);
@@ -27,6 +31,28 @@ async fn spawn_app() -> TestApp {
         address,
         db_pool: connection_pool,
     }
+}
+
+pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
+    // Create database
+    let mut connection = PgConnection::connect(&config.connection_string_without_db())
+        .await
+        .expect("Failed to connect to Postgres.");
+    connection
+        .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
+        .await
+        .expect("Failed to create database.");
+
+    // Migrate database
+    let connection_pool = PgPool::connect(&config.connection_string())
+        .await
+        .expect("Failed to connect to Postgres pool.");
+    sqlx::migrate!("./migrations")
+        .run(&connection_pool)
+        .await
+        .expect("Failed to migrate the database.");
+
+    connection_pool
 }
 
 // /health_check returns a `200 OK` response with no body
@@ -58,7 +84,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
     // Act
     let response = client
         .post(&format!("{}/subscriptions", &app.address))
-        .header("Content-Type", "application/x-www-form-urleoncoded")
+        .header("Content-Type", "application/x-www-form-urlencoded")
         .body(body)
         .send()
         .await
@@ -91,7 +117,7 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
     for (invalid_body, error_message) in test_cases {
         let response = client
             .post(&format!("{}/subscriptions", &app.address))
-            .header("Content-Type", "application/x-www-form-urleoncoded")
+            .header("Content-Type", "application/x-www-form-urlencoded")
             .body(invalid_body)
             .send()
             .await

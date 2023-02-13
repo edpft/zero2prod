@@ -1,2 +1,2 @@
 test:
-    cargo watch -q -c -w src/ -x 'test -- --test-threads=1 --nocapture'
+    cargo watch -q -c -w src/ -w tests/ -x 'test -- --test-threads=1 --nocapture'
