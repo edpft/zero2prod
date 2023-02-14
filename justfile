@@ -6,3 +6,6 @@ test-with-logging:
 
 serve:
     cargo watch -q -c -w src/ -x 'run'
+
+init-db:
+    /home/ed/repos/zero2prod/scripts/init_db.sh
