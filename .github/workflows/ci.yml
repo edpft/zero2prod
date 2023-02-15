@@ -76,17 +76,9 @@ jobs:
           key: ${{ runner.os }}-sqlx-${{ env.SQLX_VERSION }}
 
       - name: Install sqlx-cli 
-        uses: actions-rs/cargo@v1
         if: steps.cache-sqlx.outputs.cache-hit == false
-        with:
-          command: install 
-          args: >
-            sqlx-cli
-            --force
-            --version=${{ env.SQLX_VERSION }}
-            --features ${{ env.SQLX_FEATURES }}
-            --no-default-features
-            --locked
+        run: |
+          cargo install sqlx-cli --force --version=${{ env.SQLX_VERSION }} --features ${{ env.SQLX_FEATURES }} --no-default-features --locked
 
       - name: Migrate database
         run: |
@@ -141,17 +133,9 @@ jobs:
           key: ${{ runner.os }}-sqlx-${{ env.SQLX_VERSION }}
 
       - name: Install sqlx-cli 
-        uses: actions-rs/cargo@v1
         if: steps.cache-sqlx.outputs.cache-hit == false
-        with:
-          command: install 
-          args: >
-            sqlx-cli
-            --force
-            --version=${{ env.SQLX_VERSION }}
-            --features ${{ env.SQLX_FEATURES }}
-            --no-default-features
-            --locked
+        run: |
+          cargo install sqlx-cli --force --version=${{ env.SQLX_VERSION }} --features ${{ env.SQLX_FEATURES }} --no-default-features --locked
 
       - name: Migrate database
         run: |
