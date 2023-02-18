@@ -9,3 +9,14 @@ serve:
 
 init-db:
     /home/ed/repos/zero2prod/scripts/init_db.sh
+
+create-app:
+    doctl apps create --spec spec.yaml
+
+id := `doctl apps list | awk 'FNR == 2 {print $1}'`
+
+update-app:
+    doctl apps update {{id}} --spec=spec.yaml
+
+delete-app:
+    doctl apps delete {{id}}
