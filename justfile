@@ -7,7 +7,12 @@ test-with-logging:
 serve:
     cargo watch -q -c -w src/ -x 'run'
 
+remove-db:
+    docker stop pg
+    docker rm pg
+
 init-db:
+    just remove-db 
     /home/ed/repos/zero2prod/scripts/init_db.sh
 
 create-app:
