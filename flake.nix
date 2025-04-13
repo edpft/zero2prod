@@ -13,7 +13,6 @@
   };
 
   outputs = {
-    self,
     nixpkgs,
     crane,
     flake-utils,
@@ -79,16 +78,15 @@
           };
         };
     in {
-      checks = {
-        inherit bin clippy nextest;
-      };
-
       packages = {
         inherit bin dockerImage;
         default = bin;
       };
 
       devShells.default = moldDevShell {
+        checks = {
+          inherit clippy nextest;
+        };
         inputsFrom = [bin];
         packages = with pkgs; [
           postman

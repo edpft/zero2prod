@@ -1,0 +1,44 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  checks:
+    name: Automated checks
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Check Nixpkgs inputs
+        uses: DeterminateSystems/flake-checker-action@main
+        with:
+          fail-mode: true
+
+      - name: Check formatting
+        run: |
+          nix develop --command cargo fmt --check
+
+      - name: Lint
+        run: |
+          nix develop --command cargo clippy
+
+      - name: Test
+        run: |
+          nix develop --command cargo nextest run
+
+      - name: Build docker image
+        run: |
+          nix build .#dockerImage
