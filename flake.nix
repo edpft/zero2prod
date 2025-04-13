@@ -25,6 +25,9 @@
 
       pkgs = import nixpkgs {
         inherit system overlays;
+        config = {
+          allowUnfree = true;
+        };
       };
 
       # Use the rust version specified in our `rust-toolchain.toml`
@@ -87,6 +90,10 @@
 
       devShells.default = moldDevShell {
         inputsFrom = [bin];
+        packages = with pkgs; [
+          postman
+          newman
+        ];
       };
     });
 }

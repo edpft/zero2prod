@@ -1,0 +1,44 @@
+{
+	"info": {
+		"_postman_id": "1c2b3a04-edd5-48d1-ab51-aab1b02926e3",
+		"name": "Zero2Prod",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43794956",
+		"_collection_link": "https://edfawcett-taylor.postman.co/workspace/Ed-Fawcett-Taylor's-Workspace~01702a23-0ab4-46d3-85d0-0b51d20449cc/collection/43794956-1c2b3a04-edd5-48d1-ab51-aab1b02926e3?action=share&source=collection_link&creator=43794956"
+	},
+	"item": [
+		{
+			"name": "health_check_works",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/health_check",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"health_check"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
