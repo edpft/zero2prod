@@ -74,7 +74,6 @@
 
     dockerImage = pkgs.dockerTools.buildImage {
       name = "${imageDetails.registry}/${imageDetails.owner}/${imageDetails.projectName}";
-      tag = "latest";
       copyToRoot = [bin];
       config = {
         Cmd = ["${bin}/bin/zero2prod"];
