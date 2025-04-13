@@ -4,6 +4,15 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+axum = { version = "0.8.3", default-features = false, features = [
+    "http1",
+    "tokio",
+] }
+tokio = { version = "1.44.2", default-features = false, features = [
+    "macros",
+    "rt-multi-thread",
+    "net",
+] }
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]

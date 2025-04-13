@@ -1,0 +1,62 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  checks:
+    name: Continuous Integration
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Setup Nix cache
+        uses:  DeterminateSystems/flakehub-cache-action@main
+
+      - name: Check Nixpkgs inputs
+        uses: DeterminateSystems/flake-checker-action@main
+        with:
+          fail-mode: true
+
+      - name: Run automated checks
+        run: |
+          nix flake check
+
+      - name: Build image
+        run: |
+          nix build .#dockerImage
+
+      - name: Load image
+        run: |
+          export IMAGE_NAME=$(docker load < result | grep -Po 'Loaded image: \K.*')
+          echo "Loading image ${IMAGE_NAME}"
+          echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
+
+      - name: Run image
+        run: |
+          docker run --publish 8080:8080 --detach --name zero2prod "${IMAGE_NAME}"
+
+      - name: Run tests against image
+        run: |
+          nix develop --command newman run postman/Zero2Prod.postman_collection.json
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish image
+        run: |
+          docker push "${IMAGE_NAME}"
+      
